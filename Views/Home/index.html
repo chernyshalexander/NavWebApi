@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<meta charset=utf-8>
+<html>
+
+<head>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <!-- CSS FOR STYLING THE PAGE -->
+    <style>
+        #form_input {
+            margin: 0 auto;
+            width: 250px;
+            font-size: large;
+        }
+
+        #input_barcode {
+            width: 200px;
+            font-size: large;
+        }
+
+        #get-data {
+            box-shadow: inset 0px 1px 0px 0px #caefab;
+            background-color: #04AA6D;
+            border: 1px solid #268a16;
+            display: inline-block;
+            cursor: pointer;
+            color: white;
+            padding: 8px 76px;
+            text-decoration: none;
+            text-shadow: 0px 1px 0px #aade7c;
+            width: 210px;
+            font-size: large;
+        }
+
+        #table2 {
+            font-family: Arial, Helvetica, sans-serif;
+            border-collapse: collapse;
+            width: 90%;
+            margin: 0 auto;
+            box-shadow: 0 0 20px rgba(2, 151, 79, 0.15);
+            color: #084a1e;
+            display: block;
+            height: 500px;
+            overflow-y: scroll;
+        }
+
+        #table2 td,
+        #table2 th {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+
+        #table2 tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        #table2 tr:hover {
+            background-color: #ddd;
+        }
+
+        #table2 thead {
+            position: -webkit-sticky;
+            position: sticky;
+            top: 0;
+            z-index: 2;
+        }
+
+        #table2 th {
+            text-align: left;
+            background-color: #04AA6D;
+            color: white;
+            font-size: large;
+        }
+
+        #currentItem {
+            font-family: Arial, Helvetica, sans-serif;
+            border-collapse: collapse;
+            width: 90%;
+            margin: 0 auto;
+            padding: 8px;
+            box-shadow: 0 0 20px rgba(2, 151, 79, 0.15);
+            color: #084a1e;
+            font-size: x-large;
+
+        }
+
+        #currentItem tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        #table2 tr:nth-child(1) {
+            background-color: hsl(52, 84%, 88%);
+        }
+
+        #currentItem td:nth-child(1) {
+            width: 30%;
+        }
+
+        #currentItem td:nth-child(2) {
+            width: 70%;
+        }
+    </style>
+    <script>
+        $(document).ready(function () {
+            $("#currentItem").
+                html("<tr><td>Штрихкод</td><td><label id='barcode'></label></td></tr> \
+                  <tr><td>Артикул</td><td><label id='art'></label></td></tr>  \
+                  <tr><td>Наименование</td><td><label id='art_desc'></label></td></tr> \
+                  <tr><td>Цена без скидки</td><td><label id='price_wo_discount'></label></td></tr> \
+                  <tr><td>Цена со скидкой</td><td><label id='price_with_discount'></label></td></tr> \
+                  <tr><td>Номер акции</td><td><label id='disc_no'></label></td></tr> \
+                  <tr><td>Описание акции</td><td><label id='disc_desc'></label></td></tr> \
+                  ");
+            document.getElementById('input_barcode').addEventListener("keyup", event => {
+                if (event.key !== "Enter") return;
+                document.getElementById('get-data').click();
+                event.preventDefault(); // No need to `return false;`.
+            });
+            document.getElementById('input_barcode').focus();
+            $("button").click(function () {
+                var request_url = window.location.origin + "/NavWebApi/api/Spo/SpoList?barcode_string=" + document.getElementById('input_barcode').value
+                //server-rep.imperialdutyfree.ru
+                document.getElementById('input_barcode').value = '';
+                setTimeout(function () { document.getElementById('input_barcode').focus() }, 20);
+                $.get(request_url,
+                    function (data, status) {
+                        var discount_line = '';
+                        $.each(data.SpoList, function (i, item) {
+                            discount_line += '<tr>';              
+                            discount_line += '<td>' + data.SpoList[i].barcode + '</td>';
+                            discount_line += '<td>' + data.SpoList[i].art + '</td>';
+                            discount_line += '<td>' + data.SpoList[i].art_desc + '</td>';
+                            discount_line += '<td>' + data.SpoList[i].price_wo_discount + '</td>';
+                            discount_line += '<td>' + data.SpoList[i].price_with_discount + '</td>';
+                            discount_line += '<td>' + data.SpoList[i].disc_no + '</td>';
+                            discount_line += '<td>' + data.SpoList[i].disc_desc + '</td>';
+                            discount_line += '</tr>';
+                            document.getElementById("barcode").innerHTML = data.SpoList[i].barcode;
+                            document.getElementById("art").innerHTML = data.SpoList[i].art;
+                            document.getElementById("art_desc").innerHTML = data.SpoList[i].art_desc;
+                            document.getElementById("price_wo_discount").innerHTML = data.SpoList[i].price_wo_discount;
+                            document.getElementById("price_with_discount").innerHTML = data.SpoList[i].price_with_discount;
+                            document.getElementById("disc_no").innerHTML = data.SpoList[i].disc_no;
+                            document.getElementById("disc_desc").innerHTML = data.SpoList[i].disc_desc;
+                        });
+                        $("#table2").prepend(discount_line);
+                    });
+            });
+        });
+    </script>
+</head>
+
+<body>
+    <div id="form_input">
+        <label>Штрихкод:</label>
+        <input id=input_barcode type="text">
+        </br>
+        </br>
+        <button id=get-data>Запрос</button>
+        </br></br>
+    </div>
+    <table border="1" cellpadding="0" width="100%" id='currentItem'> </table>
+    </br>
+    <table id='table2'>
+        <!-- HEADING FORMATION -->
+        <thead>
+            <tr>
+                <!-- <th width="40%">English Description</th> -->
+                <th width="10%">Штрихкод</th>
+                <th width="10%">Артикул</th>
+                <th width="40%">Наменование</th>
+                <th width="10%">Цена без скидки</th>
+                <th width="10%">Цена со скидкой</th>
+                <th width="10%">Номер акции</th>
+                <th width="10%">Описание акции</th>
+            </tr>
+        </thead>
+        <!--<div id="container" ></div> -->
+
+</body>
+
+</html>
